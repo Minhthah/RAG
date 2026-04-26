@@ -1,0 +1,146 @@
+import React, { useState } from 'react';
+import { Line, Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Brain, Home, Database, Upload, Activity, ShieldAlert, Puzzle, Settings, Search, Bell, HelpCircle } from 'lucide-react';
+
+// Đăng ký các thành phần của Chart.js
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend);
+
+// Giao diện dữ liệu để TypeScript kiểm tra lỗi
+interface KPI {
+  title: string;
+  value: string | number;
+  trend: number;
+  trendText: string;
+  icon: React.ReactNode;
+  colorClass: string;
+}
+
+const Dashboard: React.FC = () => {
+  // Dữ liệu an toàn được định nghĩa rõ ràng
+  const kpiData: KPI[] = [
+    { title: 'Tài liệu đã lập chỉ mục', value: '12.458', trend: 8.2, trendText: 'so với 7 ngày trước', icon: <Database />, colorClass: 'text-blue-600 bg-blue-50' },
+    { title: 'Số lượng Chunks', value: '1.245.896', trend: 7.6, trendText: 'so với 7 ngày trước', icon: <Database />, colorClass: 'text-emerald-500 bg-emerald-50' },
+    // ... (Thêm các KPI khác tương tự)
+  ];
+
+  const lineChartData = {
+    labels: ['08/05', '09/05', '10/05', '11/05', '12/05', '13/05', '14/05', '15/05'],
+    datasets: [
+      {
+        label: 'Tài liệu',
+        data: [1200, 1400, 2100, 1600, 1800, 2180, 1800, 1400],
+        borderColor: '#2563eb',
+        tension: 0.3,
+      },
+      {
+        label: 'Chunks',
+        data: [600, 800, 1200, 900, 1000, 1500, 1100, 1000],
+        borderColor: '#93c5fd',
+        borderDash: [5, 5],
+        tension: 0.3,
+      }
+    ]
+  };
+
+  const doughnutChartData = {
+    labels: ['SharePoint', 'Confluence', 'File Server', 'Database', 'Web/Crawl', 'Khác'],
+    datasets: [{
+      data: [38.7, 22.1, 16.4, 9.3, 7.8, 5.7],
+      backgroundColor: ['#3b82f6', '#f97316', '#10b981', '#a855f7', '#64748b', '#38bdf8'],
+      borderWidth: 0,
+      cutout: '75%'
+    }]
+  };
+
+  // State an toàn để quản lý input tìm kiếm
+  const [searchQuery, setSearchQuery] = useState('');
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800">
+      
+      {/* SIDEBAR Component */}
+      <aside className="w-64 bg-slate-900 text-white flex flex-col h-full shrink-0">
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center">
+            <Brain className="text-white w-5 h-5" />
+          </div>
+          <h1 className="font-bold text-lg leading-tight">AI Knowledge<br/>Platform</h1>
+        </div>
+        {/* Menu items... */}
+      </aside>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex flex-col h-full overflow-hidden">
+        
+        {/* HEADER Component */}
+        <header className="h-16 bg-white border-b flex items-center justify-between px-6 shrink-0 z-10">
+          <h2 className="text-xl font-bold">Tổng quan hệ thống</h2>
+          <div className="flex items-center gap-6">
+            
+            {/* Input tìm kiếm - React kiểm soát an toàn */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)} // React escape input tự động
+                placeholder="Tìm kiếm tài liệu, câu hỏi..." 
+                className="pl-9 pr-4 py-1.5 border rounded-md text-sm w-80 bg-slate-50 focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* User Profile */}
+            <div className="flex items-center gap-2 border-l pl-6">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">AD</div>
+              <div className="text-sm leading-tight">
+                <div className="font-bold">Admin</div>
+                <div className="text-xs text-slate-500">Quản trị viên</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* DASHBOARD CONTENT */}
+        <div className="flex-1 overflow-y-auto p-6">
+          
+          {/* KPI CARDS */}
+          <div className="grid grid-cols-6 gap-4 mb-6">
+            {kpiData.map((kpi, index) => (
+              <div key={index} className="bg-white rounded-lg border p-4 shadow-sm flex flex-col">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center ${kpi.colorClass}`}>
+                    {kpi.icon}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 uppercase">{kpi.title}</div>
+                </div>
+                <div className="text-2xl font-bold mb-1">{kpi.value}</div>
+                <div className="text-xs text-emerald-500 font-medium">
+                  ↑ {kpi.trend}% <span className="text-slate-400 font-normal">{kpi.trendText}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CHARTS */}
+          <div className="grid grid-cols-12 gap-6 mb-6">
+            <div className="col-span-5 bg-white rounded-lg border shadow-sm p-5 h-64">
+              <h3 className="font-bold text-sm mb-4">Xu hướng Ingestion</h3>
+              <Line data={lineChartData} options={{ maintainAspectRatio: false }} />
+            </div>
+            
+            <div className="col-span-3 bg-white rounded-lg border shadow-sm p-5 h-64">
+              <h3 className="font-bold text-sm mb-4">Nguồn tài liệu</h3>
+              <div className="relative h-40">
+                <Doughnut data={doughnutChartData} options={{ maintainAspectRatio: false }} />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Dashboard;
